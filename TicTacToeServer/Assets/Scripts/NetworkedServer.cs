@@ -110,6 +110,26 @@ public class NetworkedServer : MonoBehaviour
 
                 Debug.Log(fortnite[1]);
                 break;
+
+
+            case "buttonpressed":
+                if (fortnite[1] == "X")
+                {
+                    if (id==1)
+                        SendMessageToClient("buttonpressed, otherplayerX", 2);
+                    else
+                        SendMessageToClient("buttonpressed, otherplayerX", 1);
+                } 
+                else
+                {
+                    if (id == 1)
+                        SendMessageToClient("buttonpressed, otherplayerO", 2);
+                    else
+                        SendMessageToClient("buttonpressed, otherplayerO", 1);
+                }
+
+                break;
+
             case "disconnect": // something disconnect, send message to remaining player to HALT
                 if (id == 1)
                     SendMessageToClient("disconnect", 2);
