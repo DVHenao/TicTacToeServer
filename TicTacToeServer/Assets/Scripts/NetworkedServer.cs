@@ -14,6 +14,8 @@ public class NetworkedServer : MonoBehaviour
     int hostID;
     int socketPort = 5491;
 
+    List<string> gameroomIDs = new List<string>();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -67,7 +69,35 @@ public class NetworkedServer : MonoBehaviour
     
     private void ProcessRecievedMsg(string msg, int id)
     {
-        Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
+        string[] fortnite = msg.Split(',');
+       switch(fortnite[0])
+        {
+            case "gameroom":
+            
+                if (gameroomIDs.Contains(fortnite[1])) // Game room already exists, join
+                {
+                    if(id == 2)
+                    SendMessageToClient("gameroomjoined,filled", id);
+                    if(id == 3)
+                    SendMessageToClient("gameroomjoined,spectate", id);
+                }
+                else  // Game room doesnt exist, create
+                {
+                    gameroomIDs.Add(fortnite[1]);
+                    SendMessageToClient("gameroomjoined,empty", id);
+                }
+                    
+
+
+                Debug.Log(fortnite[1]);
+                break;
+            case "disconnect": // something disconnect, send message to remaining player to HALT
+                if (id == 1)
+                    SendMessageToClient("disconnect", 2);
+                if (id == 2)
+                    SendMessageToClient("disconnect", 1);
+                break;
+        }
     }
 
 }
