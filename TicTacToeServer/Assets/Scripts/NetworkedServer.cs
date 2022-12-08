@@ -14,6 +14,8 @@ public class NetworkedServer : MonoBehaviour
     int hostID;
     int socketPort = 5491;
 
+    List<int> recIDList = new List<int>();
+
     List<string> gameroomIDs = new List<string>();
 
     // Start is called before the first frame update
@@ -48,6 +50,7 @@ public class NetworkedServer : MonoBehaviour
                 break;
             case NetworkEventType.ConnectEvent:
                 Debug.Log("Connection, " + recConnectionID);
+                recIDList.Add(recConnectionID);
                 break;
             case NetworkEventType.DataEvent:
                 string msg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
@@ -55,6 +58,7 @@ public class NetworkedServer : MonoBehaviour
                 break;
             case NetworkEventType.DisconnectEvent:
                 Debug.Log("Disconnection, " + recConnectionID);
+                recIDList.Remove(recConnectionID);
                 break;
         }
 
@@ -66,9 +70,23 @@ public class NetworkedServer : MonoBehaviour
         byte[] buffer = Encoding.Unicode.GetBytes(msg);
         NetworkTransport.Send(hostID, id, reliableChannelID, buffer, msg.Length * sizeof(char), out error);
     }
-    
+
+    public void SendMessageToClients(string msg)
+    {
+        byte error = 0;
+        byte[] buffer = Encoding.Unicode.GetBytes(msg);
+
+        for(int i = 0; i <= recIDList.Count; i++)
+        {
+            NetworkTransport.Send(hostID, i, reliableChannelID, buffer, msg.Length * sizeof(char), out error);
+        }
+        
+    }
+
     private void ProcessRecievedMsg(string msg, int id)
     {
+
+
         string[] fortnite = msg.Split(',');
        switch(fortnite[0])
         {
@@ -77,14 +95,15 @@ public class NetworkedServer : MonoBehaviour
                 if (gameroomIDs.Contains(fortnite[1])) // Game room already exists, join
                 {
                     if(id == 2)
-                    SendMessageToClient("gameroomjoined,filled", id);
-                    if(id == 3)
+                    SendMessageToClients("gameroomjoined,filled");
+                    if (id == 3)
                     SendMessageToClient("gameroomjoined,spectate", id);
                 }
                 else  // Game room doesnt exist, create
                 {
                     gameroomIDs.Add(fortnite[1]);
                     SendMessageToClient("gameroomjoined,empty", id);
+                    Debug.Log(id);
                 }
                     
 
