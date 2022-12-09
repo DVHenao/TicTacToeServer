@@ -18,6 +18,8 @@ public class NetworkedServer : MonoBehaviour
 
     List<string> gameroomIDs = new List<string>();
 
+    int gameOverCounter =0;
+
     string ID1Side, ID2Side;
 
     // Start is called before the first frame update
@@ -161,12 +163,21 @@ public class NetworkedServer : MonoBehaviour
 
                 break;
 
+            case "messagesent":
+                {
+                    string messageOut = "messagesent," + fortnite[1];
+                    SendMessageToClients(messageOut);
+                }
+                break;
+
+
             case "disconnect": // something disconnect, send message to remaining player to HALT
                 if (id == 1)
                     SendMessageToClient("disconnect", 2);
                 if (id == 2)
                     SendMessageToClient("disconnect", 1);
                 break;
+
         }
     }
 
