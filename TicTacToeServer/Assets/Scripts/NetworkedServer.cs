@@ -119,15 +119,13 @@ public class NetworkedServer : MonoBehaviour
                     if (id == 1)
                     {
                         SendMessageToClient("buttonpressed,otherplayerX", 2);
-                        ID1Side = "X";
-                        ID2Side = "O";
+
                         break;
                     }
                     else
                     {
                         SendMessageToClient("buttonpressed,otherplayerX", 1);
-                        ID1Side = "O";
-                        ID2Side = "X";
+
                         break;
                     } 
                 }
@@ -136,32 +134,27 @@ public class NetworkedServer : MonoBehaviour
                     if (id == 1)
                     {
                         SendMessageToClient("buttonpressed,otherplayerO", 2);
-                        ID1Side = "O";
-                        ID2Side = "X";
                         break;
                     }
                     else
                     {
                         SendMessageToClient("buttonpressed,otherplayerO", 1);
-                        ID1Side = "X";
-                        ID2Side = "O";
                         break;
                     }
 
                 }
                 else // selecting tictactoe buttons
                 {
-                   
                     string messageOut;
 
                     if (id == 1)
                     {
-                        messageOut = "buttonpressed," + fortnite[1] + "," + ID1Side;
+                        messageOut = "buttonpressed," + fortnite[1];
                         SendMessageToClient(messageOut, 2);
                     }
                     else if (id == 2)
                     {
-                        messageOut = "buttonpressed," + fortnite[1] + "," + ID2Side;
+                        messageOut = "buttonpressed," + fortnite[1];
                         SendMessageToClient(messageOut, 1);
                     }
                 }
