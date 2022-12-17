@@ -18,7 +18,7 @@ public class NetworkedServer : MonoBehaviour
 
     List<string> gameroomIDs = new List<string>();
 
-    int gameOverCounter =0;
+    int gameOverCounter = 0;
 
     string ID1Side, ID2Side;
 
@@ -31,7 +31,7 @@ public class NetworkedServer : MonoBehaviour
         unreliableChannelID = config.AddChannel(QosType.Unreliable);
         HostTopology topology = new HostTopology(config, maxConnections);
         hostID = NetworkTransport.AddHost(topology, socketPort, null);
-        
+
     }
 
     // Update is called once per frame
@@ -55,7 +55,7 @@ public class NetworkedServer : MonoBehaviour
             case NetworkEventType.ConnectEvent:
                 Debug.Log("Connection, " + recConnectionID);
                 recIDList.Add(recConnectionID);
-                if (recConnectionID >2)
+                if (recConnectionID > 2)
                     SendMessageToClient("gameroomjoined,spectate", recConnectionID);
 
 
@@ -71,7 +71,7 @@ public class NetworkedServer : MonoBehaviour
         }
 
     }
-  
+
     public void SendMessageToClient(string msg, int id)
     {
         byte error = 0;
@@ -84,11 +84,11 @@ public class NetworkedServer : MonoBehaviour
         byte error = 0;
         byte[] buffer = Encoding.Unicode.GetBytes(msg);
 
-        for(int i = 0; i <= recIDList.Count; i++)
+        for (int i = 0; i <= recIDList.Count; i++)
         {
             NetworkTransport.Send(hostID, i, reliableChannelID, buffer, msg.Length * sizeof(char), out error);
         }
-        
+
     }
 
     private void ProcessRecievedMsg(string msg, int id)
@@ -187,16 +187,7 @@ public class NetworkedServer : MonoBehaviour
                 break;
 
             case "register":
-                using (StreamReader sr = new StreamReader("c:/Temp/LoginVerification.txt"))
-                {
-                    string line;
-                    // Read and display lines from the file until the end of
-                    // the file is reached.
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        Debug.Log(line);
-                    }
-                }
+                CreateAccount(fortnite, id);
                 break;
         }
 
@@ -233,5 +224,34 @@ public class NetworkedServer : MonoBehaviour
         }
     }
 
+    public void CreateAccount(string[] fortnite, int id)
+    {
+        using (StreamReader sr = new StreamReader("c:/Temp/LoginVerification.txt"))
+        {
+            string line;
 
+            while ((line = sr.ReadLine()) != null)
+            {
+                string[] loginVerification = line.Split(',');
+
+                if (loginVerification[0] == fortnite[1])
+                {
+                    Debug.Log("username already exists");
+                    SendMessageToClient("loginregister,usernametaken", id);
+                    return;
+                }
+            }
+        }
+
+        DirectoryInfo[] cDirs = new DirectoryInfo(@"c:\Temp").GetDirectories();
+
+        string account = fortnite[1] + "," + fortnite[2];
+
+        using (StreamWriter sw = new StreamWriter("c:/Temp/LoginVerification.txt", true))
+        {
+            sw.WriteLine(account);
+            SendMessageToClient("loginregister,accountcreated", id);
+        }
+    }
 }
+
