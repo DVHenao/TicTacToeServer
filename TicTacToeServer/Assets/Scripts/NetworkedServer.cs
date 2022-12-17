@@ -55,6 +55,10 @@ public class NetworkedServer : MonoBehaviour
             case NetworkEventType.ConnectEvent:
                 Debug.Log("Connection, " + recConnectionID);
                 recIDList.Add(recConnectionID);
+                if (recConnectionID >2)
+                    SendMessageToClient("gameroomjoined,spectate", recConnectionID);
+
+
                 break;
             case NetworkEventType.DataEvent:
                 string msg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
@@ -92,17 +96,17 @@ public class NetworkedServer : MonoBehaviour
         Debug.Log("full message: " + msg + " host ID: " + id);
 
         string[] fortnite = msg.Split(',');
-       switch(fortnite[0])
+        switch (fortnite[0])
         {
             case "gameroom":
                 Debug.Log(fortnite[1]);
 
                 if (gameroomIDs.Contains(fortnite[1])) // Game room already exists, join
                 {
-                    if(id == 2)
-                    SendMessageToClients("gameroomjoined,filled");
+                    if (id == 2)
+                        SendMessageToClients("gameroomjoined,filled");
                     if (id == 3)
-                    SendMessageToClient("gameroomjoined,spectate", id);
+                        SendMessageToClient("gameroomjoined,spectate", id);
                 }
                 else  // Game room doesnt exist, create
                 {
@@ -129,7 +133,7 @@ public class NetworkedServer : MonoBehaviour
                         SendMessageToClient("buttonpressed,otherplayerX", 1);
 
                         break;
-                    } 
+                    }
                 }
                 else if (fortnite[1] == "O")
                 {
@@ -178,7 +182,56 @@ public class NetworkedServer : MonoBehaviour
                     SendMessageToClient("disconnect", 1);
                 break;
 
+            case "login":
+                checkLoginCredentials(fortnite, id);
+                break;
+
+            case "register":
+                using (StreamReader sr = new StreamReader("c:/Temp/LoginVerification.txt"))
+                {
+                    string line;
+                    // Read and display lines from the file until the end of
+                    // the file is reached.
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        Debug.Log(line);
+                    }
+                }
+                break;
+        }
+
+    }
+    public void checkLoginCredentials(string[] fortnite, int id)
+    {
+        using (StreamReader sr = new StreamReader("c:/Temp/LoginVerification.txt"))
+        {
+            string line;
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                string[] loginVerification = line.Split(',');
+
+                if (loginVerification[0] == fortnite[1])
+                {
+                    Debug.Log("username correct, testing pass");
+
+                    if (loginVerification[1] == fortnite[2])
+                    {
+                        SendMessageToClient("loginregister,loginsuccess", id);
+                        return;
+                    }
+                    else // right user, wrong pass
+                    {
+                        SendMessageToClient("loginregister,wrongpassword", id);
+                        return;
+                    }
+                }
+            }
+
+            SendMessageToClient("loginregister,noaccount", id);
+
         }
     }
+
 
 }
